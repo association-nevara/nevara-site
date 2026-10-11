@@ -1,72 +1,77 @@
-# Site de l'association NEVARA · nevara-asso.com
+# nevara-site
 
-Site statique (HTML, CSS, JS), sans base de données ni admin. Hébergé gratuitement sur Cloudflare, code sur GitHub.
+Site officiel de l'**Association NEVARA** (loi 1901, RNA W851002978, Niort), en ligne sur **https://www.nevara-asso.com**.
 
-## Contenu du dossier
+Le site présente l'association, son objet statutaire, sa structure esport FRACTURE ESPORT, et permet de la soutenir (don HelloAsso, adhésion) ou de la contacter.
+
+## Fonctionnement
+
+Le site est **statique** : des pages HTML, une feuille de style et un petit script. Il n'y a ni base de données, ni espace d'administration, ni serveur à maintenir.
+
+```
+GitHub (ce dépôt)  --push-->  Cloudflare Workers  --sert-->  www.nevara-asso.com
+```
+
+- **GitHub** conserve le code et l'historique de chaque modification.
+- **Cloudflare Workers** est relié à ce dépôt : à chaque modification publiée sur la branche `main`, le site est reconstruit et mis en ligne automatiquement, en une minute environ.
+- **Cloudflare** gère aussi les DNS du domaine `nevara-asso.com` (Gandi reste le registrar) ainsi que le HTTPS.
+- **Web3Forms** transmet les messages du formulaire de contact par e-mail à `contact@nevara-asso.fr`.
+- **HelloAsso** gère les dons. Aucun paiement ne passe par le site.
+
+Tout est gratuit.
+
+## Contenu du dépôt
 
 | Fichier | Rôle |
 |---|---|
 | `index.html` | Accueil |
-| `association.html` | L'association (objet, histoire, fonctionnement) |
-| `fracture.html` | FRACTURE ESPORT (pôle esport, réseaux) |
-| `soutenir.html` | Don HelloAsso + devenir membre |
-| `contact.html` | Formulaire (Web3Forms) + adresse e-mail |
+| `association.html` | L'association : objet, histoire, fonctionnement |
+| `fracture.html` | FRACTURE ESPORT, la structure esport de NEVARA |
+| `soutenir.html` | Don HelloAsso et adhésion |
+| `contact.html` | Formulaire de contact et adresse e-mail |
 | `mentions-legales.html`, `confidentialite.html` | Pages légales |
-| `404.html` | Page d'erreur |
-| `assets/site.css` | Toute la mise en forme (couleurs dans `:root`) |
-| `assets/site.js` | Menu mobile, bouton Copier, envoi du formulaire |
-| `assets/fonts/` | Montserrat + Lora hébergées sur le site (pas de Google Fonts, donc RGPD tranquille) |
-| `_headers` | Sécurité + CSP (autorise `api.web3forms.com` pour le formulaire) |
+| `404.html` | Page affichée pour une adresse inexistante |
+| `assets/site.css` | Toute la mise en forme (couleurs et polices dans `:root`) |
+| `assets/site.js` | Menu mobile, bouton « Copier », envoi du formulaire |
+| `assets/fonts/` | Polices Montserrat et Lora, hébergées sur le site (aucun appel à Google Fonts) |
+| `assets/*.webp`, `*.png`, `*.jpg` | Logo, lys du héros, icônes, image de partage |
+| `_headers` | En-têtes de sécurité et politique CSP |
+| `_redirects` | Redirections d'anciennes adresses (vide pour l'instant) |
 | `robots.txt`, `sitemap.xml` | Référencement |
 | `manifest.json`, `sw.js` | Site installable sur téléphone (PWA) |
+| `wrangler.jsonc` | Configuration Cloudflare Workers (indispensable au déploiement) |
+| `.assetsignore` | Fichiers à ne pas publier (ce README, la configuration) |
 
-Les pages sont générées par `build.py` (livré à côté de ce dossier, pas dedans) à partir d'un gabarit unique : en-tête et pied de page identiques partout. Pour modifier un texte, le plus simple est de modifier `build.py` puis de relancer `python3 build.py`. Une petite retouche directe dans un `.html` marche aussi, mais elle sera écrasée au prochain build.
+## Modifier le site
 
----
+Les pages sont générées par un script Python, `build.py`, conservé **hors de ce dépôt** dans le dossier de travail du site. Il contient tous les textes et un gabarit unique, pour que l'en-tête, le menu et le pied de page soient identiques sur toutes les pages.
 
-## 1. Formulaire de contact
+1. Modifier le texte dans `build.py`.
+2. Lancer `python3 build.py` : les fichiers `.html` sont régénérés.
+3. Envoyer les fichiers modifiés sur ce dépôt : le site se met à jour tout seul.
 
-Déjà actif : la clé Web3Forms (liée à contact@nevara-asso.fr) est dans `build.py` (`WEB3FORMS_CLE`) et dans `contact.html`. Elle est publique par nature, ce n'est pas un secret.
-Le jour où on passe à `contact@nevara-asso.com` : changer `MAIL` dans `build.py`, créer une nouvelle clé Web3Forms avec cette adresse, relancer `python3 build.py`.
+Une petite correction directement dans un fichier `.html` fonctionne aussi, mais elle sera écrasée au prochain passage de `build.py`.
 
-## 2. Mettre en ligne (Cloudflare Workers, relié à GitHub)
+## Identité visuelle
 
-Pas besoin de Supabase : le site est entièrement statique.
+- Couleurs tirées du logo : marine `#262F4A`, crème `#F7EEDE`, bleu-lys `#A3AEDB` (accent), or `#C78823` en touche minimale.
+- Polices : Montserrat pour les titres, Lora pour le texte.
+- Alternance de sections sombres (marine) et claires (papier crème).
 
-1. GitHub : dépôt `nevara-site` (compte de l'asso) contenant **le contenu du dossier `site`** à la racine, y compris `wrangler.jsonc` et `.assetsignore` (indispensables : sans eux, le build Cloudflare échoue). Ne pas y mettre `build.py` ni le zip.
-2. Cloudflare > Workers et Pages > le Worker `nevara-site`, relié au dépôt : chaque push redéploie le site.
-3. `wrangler.jsonc` indique de servir les fichiers du dossier tels quels et d'afficher `404.html` pour les adresses inconnues. `.assetsignore` évite de publier le README et la config.
+## Conventions
 
-## 3. Brancher le domaine (DNS gérés par Cloudflare)
+- Pas de tiret long dans les textes (`build.py` refuse de générer une page qui en contient). Utiliser virgules, points médians (·) ou traits d'union.
+- Pas de traits décoratifs ni d'ornements génériques.
+- Écriture inclusive au point médian, ton institutionnel.
+- Pas de noms de membres du bureau ni d'adresse complète sur les pages publiques. L'adresse du siège figure uniquement dans les mentions légales.
+- Toute nouvelle intégration externe (script, iframe, API) doit être autorisée dans la CSP de `_headers`, sinon le navigateur la bloque.
 
-Choix retenu : le domaine nevara-asso.com est ajouté à Cloudflare et ses serveurs de noms passent de Gandi à Cloudflare. Gandi reste le registrar (renouvellement du domaine).
+## DNS (zone Cloudflare)
 
-Avant la bascule, dans Cloudflare > DNS, la zone doit contenir (MX et TXT en « DNS uniquement ») :
-- les 5 MX Google (1 aspmx, 5 alt1, 5 alt2, 10 alt3, 10 alt4) ;
-- TXT `@` : `v=spf1 include:_spf.google.com ~all` (un seul SPF) ;
-- TXT `google._domainkey` : la clé DKIM complète (vérifier qu'elle n'est pas tronquée) ;
-- TXT `@` : `MS=ms72903211` et le ou les `google-site-verification` ;
-- CNAME `2zcstrgtqsze` → `gv-iey35bvytlgksw.dv.googlehosted.com` (DNS uniquement).
-Supprimer : le A `@ 217.70.184.55` et le CNAME `www → webredir.gandi.net` (anciennes redirections Gandi). Inutile de recréer `fracture` et `_dnsauth.fracture`.
+Ne jamais supprimer ni modifier sans raison les enregistrements de messagerie Google : les 5 MX, le SPF, le DKIM `google._domainkey`, le DMARC `_dmarc`, les TXT `google-site-verification` et `MS=`, et le CNAME de vérification Google. Ne jamais ajouter de MX ou de SPF Microsoft : les mails sont gérés par Google Workspace.
 
-Bascule :
-1. Gandi > nevara-asso.com : si DNSSEC est activé, le désactiver d'abord.
-2. Gandi > Serveurs de noms > Externes : coller les 2 serveurs donnés par Cloudflare.
-3. Attendre que Cloudflare passe le domaine en « Actif ».
-4. Projet Pages > Custom domains : ajouter `www.nevara-asso.com` puis `nevara-asso.com` (Cloudflare crée les enregistrements lui-même).
-5. Règles > Règles de redirection : `nevara-asso.com/*` → `https://www.nevara-asso.com/${1}`, 301 (le site est prévu en www).
-6. Envoyer un mail de test depuis une adresse extérieure vers une adresse @nevara-asso.com.
+## Contacts
 
-**Ne jamais ajouter** : MX Microsoft, autodiscover, SPF Microsoft, enregistrements Teams.
-
-## 4. Après la mise en ligne
-
-- Google Search Console : ajouter la propriété (le domaine est déjà vérifié par le TXT Google), soumettre `https://www.nevara-asso.com/sitemap.xml`.
-- Tester le formulaire avec un vrai message.
-- Donner l'adresse du site dans la demande Google for Nonprofits.
-
-## Règles à garder
-
-- Pas de tirets longs (le build refuse de générer une page qui en contient).
-- Pas de noms du bureau ni d'adresse complète sur les pages publiques (adresse complète uniquement dans les mentions légales).
-- Toute nouvelle intégration externe (iframe, script, API) doit être ajoutée dans la CSP de `_headers`, sinon elle est bloquée.
+- Association : contact@nevara-asso.fr
+- Directrice de la publication : la Présidente de l'association
+- Responsable du site : le Secrétaire Général
